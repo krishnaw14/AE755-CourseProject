@@ -74,18 +74,17 @@ def train(args):
 			y_pred = a2
 	        
 	        # Calculate Loss
-			m = x.shape[0]
-			loss = -np.sum(y*np.log(y_pred) + (1-y)*np.log(1-y_pred))/m
+			loss = -np.sum(y*np.log(y_pred) + (1-y)*np.log(1-y_pred))/batch_size
 			epoch_loss += loss
 	        
 	        # Backward Pass
 			da2 = -(y/y_pred - (1-y)/(1-y_pred))
 	        
-			dW2 = np.dot(a1.T, da2*a2*(1-a2))/m
-			db2 = np.sum(da2, axis=0, keepdims=True)/m
+			dW2 = np.dot(a1.T, da2*a2*(1-a2))/batch_size
+			db2 = np.sum(da2, axis=0, keepdims=True)/batch_size
 	        
-			dW1 = np.dot(x.T, np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1) )/m
-			db1 = np.sum(np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1), axis=0, keepdims=True)/m
+			dW1 = np.dot(x.T, np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1) )/batch_size
+			db1 = np.sum(np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1), axis=0, keepdims=True)/batch_size
 	        
 			W2 -= lr*dW2
 			b2 -= lr*db2
