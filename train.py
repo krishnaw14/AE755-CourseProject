@@ -1,7 +1,8 @@
 import os
 import numpy as np 
 import torch
-from tqdm import tqdm 
+from tqdm import tqdm
+import matplotlib.pyplot as plt 
 
 from dataloader import get_mnist_data
 
@@ -25,16 +26,15 @@ def train(args):
 			x = data[0].view(-1, 784).numpy()
 			y = data[1].numpy()
 	        
-	        # Forward Pass
 			h1 = np.dot(x, W1) + b1 
 			a1 = sigmoid(h1)
 			h2 = np.dot(a1, W2) + b2
 			a2 = sigmoid(h2)
 
 			correct_predictions += np.sum(np.argmax(a2, axis=1) == y)
-			# import pdb; pdb.set_trace()
 
-		print('Test Set Accuracy:(%)', correct_predictions*100/(test_loader.batch_size*iters_per_epoch))
+		# print('Test Set Accuracy:(%)', correct_predictions*100/(test_loader.batch_size*iters_per_epoch))
+		return correct_predictions*100/(test_loader.batch_size*iters_per_epoch)
 
 
 	batch_size = args.batch_size
@@ -54,11 +54,11 @@ def train(args):
 	else:
 		raise NotImplementedError
 
-	print('Initial Evaluation on Test Set:')
-	predict()
+	training_loss_values = []
+	test_accuracy_values = []
 	for epoch in range(num_epochs):
 		iters_per_epoch = np.ceil(len(train_loader.sampler) / train_loader.batch_size)
-		pbar = tqdm(enumerate(train_loader), desc = 'Training Loss at epoch', total=iters_per_epoch)
+		pbar = tqdm(enumerate(train_loader), desc = 'Training Loss', total=iters_per_epoch)
 	    
 		epoch_loss = 0
 		for i, data in pbar:
@@ -94,7 +94,23 @@ def train(args):
 			pbar.set_description('Epoch: {}'.format(epoch)) # Printing Batch Loss here slows down training 
 	        
 		print('Average Epoch Loss:', epoch_loss/iters_per_epoch)
+		training_loss_values.append(epoch_loss/iters_per_epoch)
+		test_accuracy_values.append(predict())
 
-	print('Final Evaluation on Test Set:')
-	predict()
+	# print('Final Evaluation on Test Set:')
+	# predict()
+
+	plt.plot(training_loss_values)
+	plt.title('Training Loss')
+	plt.ylabel('Average BCE Loss')
+	plt.xlabel('Epochs')
+	plt.savefig('training_loss.png')
+
+	plt.clf()
+	plt.plot(test_accuracy_values)
+	plt.title('Test Set Accuracy')
+	plt.ylabel('Correct classification percentage')
+	plt.xlabel('Epochs')
+	plt.savefig('test_accuracy.png')
+
 	
