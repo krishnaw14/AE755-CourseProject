@@ -6,24 +6,26 @@ import torch
 import pandas as pd 
 import numpy as np 
 
-def get_mnist_data(batch_size):
+def get_mnist_data(batch_size, test_batch_size):
 	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 	mnist_train_data = MNIST('data/', train=True, download=True, transform=transform)
 	mnist_test_data = MNIST('data/', train=False, download=True, transform=transform)
 	train_loader = torch.utils.data.DataLoader(mnist_train_data, batch_size=batch_size, shuffle=True)
-	test_loader = torch.utils.data.DataLoader(mnist_test_data, batch_size=batch_size, shuffle=True)
+	test_loader = torch.utils.data.DataLoader(mnist_test_data, batch_size=test_batch_size, shuffle=True)
 
 	return train_loader, test_loader
 
-def get_taxi_time_data(batch_size, data_path='data/taxi_time.csv'):
+def get_taxi_time_data(batch_size, test_batch_size, data_path='data/taxi_time.csv'):
 
 	dataset = TaxiTimeData(data_path)
 	dataset = LimitDataset(dataset, 10000)
 	dataset_len = len(dataset)
 	train_data, test_data = torch.utils.data.random_split(dataset, [int(dataset_len*0.85), dataset_len-int(dataset_len*0.85)])
 
+	if batch_size == None:
+		batch_size = int(dataset_len*0.85)
 	train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
-	test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True)
+	test_loader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=True)
 
 	return train_loader, test_loader
 
@@ -50,15 +52,23 @@ class TaxiTimeData(Dataset):
 
 		output_features = ['t_minutes']
 
-       # Nomalize the data
-		df[weather_features] = (df[weather_features] - df[weather_features].mean())/df[weather_features].std()
-		df[traffic_features] = (df[traffic_features] - df[traffic_features].mean())/df[traffic_features].std()
-		df[output_features] = (df[output_features] - df[output_features].min())/(df[output_features].max()-df[output_features].min())
-
        # Remove Unnecessary Entries
 		df = df[np.isnan(df[weather_features].values)==False]
 		df = df[np.isnan(df[traffic_features].values)==False]
 		df = df[np.isnan(df[output_features].values)==False]
+
+		# self.output_mean = df[output_features].values.mean()
+		# self.output_std = df[output_features].values.std()
+		# df = df[df[output_features].values < self.output_mean+self.output_std]
+		# df = df[df[output_features].values > self.output_mean-self.output_std]
+
+		self.output_max = df[output_features].values.max()
+		self.output_min = df[output_features].values.min()
+
+       # Nomalize the data
+		df[weather_features] = (df[weather_features] - df[weather_features].mean())/df[weather_features].std()
+		df[traffic_features] = (df[traffic_features] - df[traffic_features].mean())/df[traffic_features].std()
+		df[output_features] = (df[output_features] - df[output_features].min())/(df[output_features].max()-df[output_features].min())
 
 		self.weather_features = df[weather_features].values
 		self.traffic_features = df[traffic_features].values

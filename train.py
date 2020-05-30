@@ -20,9 +20,10 @@ def train(args):
 	# Make this a separate function later
 	def predict():
 		iters_per_epoch = np.ceil(len(test_loader.sampler) / test_loader.batch_size)
-		pbar = tqdm(enumerate(test_loader), desc = 'Test Set Evaluation', total=iters_per_epoch)
+		# pbar = tqdm(enumerate(test_loader), desc = 'Test Set Evaluation', total=iters_per_epoch)
+		print('Test Set Evaluation')
 		correct_predictions = 0.0
-		for i, data in pbar:
+		for i, data in enumerate(test_loader):
 			if args.data == 'mnist':
 				x = data[0].view(-1, 784).numpy()
 				y = to_one_hot(data[1].numpy(), num_labels=y_dim)
@@ -40,13 +41,16 @@ def train(args):
 			elif args.data == 'taxi_time':
 				correct_predictions += np.sum((a2-y)**2)/100
 
-		# print('Test Set Accuracy:(%)', correct_predictions*100/(test_loader.BATCH_SIZE*iters_per_epoch))
+		# print('Test Set Accuracy:(%)', correct_predictions*100/(test_loader.batch_size*iters_per_epoch))
 		return correct_predictions*100/(test_loader.batch_size*iters_per_epoch)
 
+	batch_size = args.batch_size
+	test_batch_size = args.batch_size
+	num_epochs = args.num_epochs
+	LR = args.lr
 
-	BATCH_SIZE = args.BATCH_SIZE
-	NUM_EPOCHS = args.NUM_EPOCHS
-	LR = args.LR
+	if args.optim == 'vanilla_gd':
+		batch_size=None 
 
 	if args.data == 'mnist':
 		x_dim = 784
@@ -57,7 +61,7 @@ def train(args):
 		W2 =  np.random.randn(h_dim, y_dim)*0.01
 		b2 =  np.random.randn(1, y_dim)*0.01
 
-		train_loader, test_loader = get_mnist_data(BATCH_SIZE)
+		train_loader, test_loader = get_mnist_data(batch_size, test_batch_size)
 
 	elif args.data == 'taxi_time':
 		x_dim = 20
@@ -68,15 +72,26 @@ def train(args):
 		W2 =  np.random.randn(h_dim, y_dim)*0.01
 		b2 =  np.random.randn(1, y_dim)*0.01
 
-		train_loader, test_loader = get_taxi_time_data(BATCH_SIZE)
+		train_loader, test_loader = get_taxi_time_data(batch_size, test_batch_size)
 
 	else:
 		raise NotImplementedError
 
+	# Evaluation
+	if args.eval_only:
+		W1 = np.load(os.path.join(args.eval_param_dir, '{}_W1.npy'.format(args.optim)), allow_pickle=False)
+		b1 = np.load(os.path.join(args.eval_param_dir, '{}_b1.npy'.format(args.optim)), allow_pickle=False)
+		W2 = np.load(os.path.join(args.eval_param_dir, '{}_W2.npy'.format(args.optim)), allow_pickle=False)
+		b2 = np.load(os.path.join(args.eval_param_dir, '{}_b2.npy'.format(args.optim)), allow_pickle=False)
+
+		print('Evaluating on Test Set: ', predict())
+
+		return
+
 	training_loss_values = []
 	test_accuracy_values = []
 
-	for epoch in range(NUM_EPOCHS):
+	for epoch in range(num_epochs):
 		iters_per_epoch = np.ceil(len(train_loader.sampler) / train_loader.batch_size)
 		pbar = tqdm(enumerate(train_loader), desc = 'Training Loss', total=iters_per_epoch)
 	    
@@ -88,7 +103,6 @@ def train(args):
 			elif args.data == 'taxi_time':
 				x = data[0].numpy()
 				y = data[1].numpy()
-				# import pdb; pdb.set_trace()
 	        
 	        # Forward Pass
 			h1 = np.dot(x, W1) + b1 
@@ -100,22 +114,21 @@ def train(args):
 	        
 	        # Calculate Loss
 			if args.data == 'mnist':
-				loss = -np.sum(y*np.log(y_pred) + (1-y)*np.log(1-y_pred))/BATCH_SIZE
+				loss = -np.sum(y*np.log(y_pred) + (1-y)*np.log(1-y_pred))/train_loader.batch_size
 				da2 = -(y/y_pred - (1-y)/(1-y_pred))
 
 			elif args.data == 'taxi_time':
 				loss = np.mean((y_pred-y)**2)
 				da2 = 2*(y_pred-y)
 
-			# import pdb; pdb.set_trace()
 			epoch_loss += loss
 	        
 	        # Backward Pass
-			dW2 = np.dot(a1.T, da2*a2*(1-a2))/BATCH_SIZE
-			db2 = np.sum(da2, axis=0, keepdims=True)/BATCH_SIZE
+			dW2 = np.dot(a1.T, da2*a2*(1-a2))/train_loader.batch_size
+			db2 = np.sum(da2, axis=0, keepdims=True)/train_loader.batch_size
 	        
-			dW1 = np.dot(x.T, np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1) )/BATCH_SIZE
-			db1 = np.sum(np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1), axis=0, keepdims=True)/BATCH_SIZE
+			dW1 = np.dot(x.T, np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1) )/train_loader.batch_size
+			db1 = np.sum(np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1), axis=0, keepdims=True)/train_loader.batch_size
 	        
 			W2 -= LR*dW2
 			b2 -= LR*db2
@@ -131,17 +144,26 @@ def train(args):
 	print('Final Evaluation on Test Set:')
 	print(predict())
 
+	# Save params
+	os.makedirs(args.save_param_dir, exist_ok=True)
+	np.save(os.path.join(args.save_param_dir, '{}_W1.npy'.format(args.optim)), W1, allow_pickle=False)
+	np.save(os.path.join(args.save_param_dir, '{}_b1.npy'.format(args.optim)), b1, allow_pickle=False)
+	np.save(os.path.join(args.save_param_dir, '{}_W2.npy'.format(args.optim)), W2, allow_pickle=False)
+	np.save(os.path.join(args.save_param_dir, '{}_b2.npy'.format(args.optim)), b2, allow_pickle=False)
+
+	os.makedirs(args.save_plots_dir, exist_ok=True)
+
 	plt.plot(training_loss_values)
-	plt.title('Training Loss')
-	plt.ylabel('Average BCE Loss')
+	plt.title('Training Loss for optim: {}'.format(args.optim))
+	plt.ylabel('MSE')
 	plt.xlabel('Epochs')
-	plt.savefig('training_loss.png')
+	plt.savefig(os.path.join(args.save_plots_dir, 'training_loss_{}.png'.format(args.optim)))
 
 	plt.clf()
 	plt.plot(test_accuracy_values)
-	plt.title('Test Set Accuracy')
-	plt.ylabel('Correct classification percentage')
+	plt.title('Test Set MSE Loss for optim: {}'.format(args.optim))
+	plt.ylabel('MSE')
 	plt.xlabel('Epochs')
-	plt.savefig('test_accuracy.png')
+	plt.savefig(os.path.join(args.save_plots_dir, 'test_accuracy_{}.png'.format(args.optim)))
 
 	
