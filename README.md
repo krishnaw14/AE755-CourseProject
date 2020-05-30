@@ -11,7 +11,7 @@ For training via SGD:
 `$ python main.py --data taxi_time --optim sgd`
 
 For training via Vanilla Gradient Descent: 
-`$ python main.py --data taxi_time --optim vanilla_gd`
+`$ python main.py --data taxi_time --optim vanilla_gd --num_epochs 100 --lr 0.02`
 
 For training via Langevin Dynamics: 
 `$ python main.py --data taxi_time --optim langevin`
