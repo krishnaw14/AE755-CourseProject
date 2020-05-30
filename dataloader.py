@@ -10,6 +10,10 @@ def get_mnist_data(batch_size, test_batch_size):
 	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 	mnist_train_data = MNIST('data/', train=True, download=True, transform=transform)
 	mnist_test_data = MNIST('data/', train=False, download=True, transform=transform)
+
+	if batch_size == None:
+		batch_size = len(mnist_train_data)
+
 	train_loader = torch.utils.data.DataLoader(mnist_train_data, batch_size=batch_size, shuffle=True)
 	test_loader = torch.utils.data.DataLoader(mnist_test_data, batch_size=test_batch_size, shuffle=True)
 
@@ -24,6 +28,7 @@ def get_taxi_time_data(batch_size, test_batch_size, data_path='data/taxi_time.cs
 
 	if batch_size == None:
 		batch_size = int(dataset_len*0.85)
+		
 	train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 	test_loader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=True)
 

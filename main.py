@@ -6,11 +6,11 @@ import torch
 from train import train
 
 np.random.seed(0)
-torch.manual_seed(0)
+# torch.manual_seed(0)
 
 parser = argparse.ArgumentParser(description='Neural Network Training')
 
-parser.add_argument('--data', type=str, default='mnist', required=True)
+parser.add_argument('--data', type=str, default='mnist',choices=['mnist', 'taxi_time'], required=True)
 parser.add_argument('--optim', type=str, default='sgd', choices=['vanilla_gd', 'sgd', 'langevin_dynamics'], required=True)
 
 parser.add_argument('--batch_size', type=int, default=32, required=False)
