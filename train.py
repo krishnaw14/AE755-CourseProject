@@ -26,7 +26,7 @@ def train(args):
 		for i, data in enumerate(test_loader):
 			if args.data == 'mnist':
 				x = data[0].view(-1, 784).numpy()
-				y = to_one_hot(data[1].numpy(), num_labels=y_dim)
+				y = data[1].numpy()
 			elif args.data == 'taxi_time':
 				x = data[0].numpy()
 				y = data[1].numpy()
@@ -161,14 +161,14 @@ def train(args):
 
 	plt.plot(training_loss_values)
 	plt.title('Training Loss for optim: {}'.format(args.optim))
-	plt.ylabel('MSE')
+	plt.ylabel('Training Loss')
 	plt.xlabel('Epochs')
 	plt.savefig(os.path.join(args.save_plots_dir, 'training_loss_{}.png'.format(args.optim)))
 
 	plt.clf()
 	plt.plot(test_accuracy_values)
 	plt.title('Test Set MSE Loss for optim: {}'.format(args.optim))
-	plt.ylabel('MSE')
+	plt.ylabel('Test Set evaluation')
 	plt.xlabel('Epochs')
 	plt.savefig(os.path.join(args.save_plots_dir, 'test_accuracy_{}.png'.format(args.optim)))
 
