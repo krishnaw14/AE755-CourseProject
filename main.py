@@ -11,7 +11,7 @@ torch.manual_seed(0)
 parser = argparse.ArgumentParser(description='Neural Network Training')
 
 parser.add_argument('--data', type=str, default='mnist', required=True)
-parser.add_argument('--optim', type=str, default='sgd', choices=['vanilla_gd', 'sgd', 'langevin'], required=True)
+parser.add_argument('--optim', type=str, default='sgd', choices=['vanilla_gd', 'sgd', 'langevin_dynamics'], required=True)
 
 parser.add_argument('--batch_size', type=int, default=32, required=False)
 parser.add_argument('--num_epochs', type=int, default=40, required=False)

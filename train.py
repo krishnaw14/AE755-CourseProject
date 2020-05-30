@@ -130,10 +130,16 @@ def train(args):
 			dW1 = np.dot(x.T, np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1) )/train_loader.batch_size
 			db1 = np.sum(np.dot(da2*a2*(1-a2), W2.T)*a1*(1-a1), axis=0, keepdims=True)/train_loader.batch_size
 	        
-			W2 -= LR*dW2
-			b2 -= LR*db2
-			W1 -= LR*dW1
-			b1 -= LR*db1
+			if args.optim == 'langevin_dynamics':
+				W2 -= (0.5*(LR**2)*dW2 + LR*np.random.randn(*W2.shape))
+				b2 -= (0.5*(LR**2)*db2 + LR*np.random.randn(*b2.shape))
+				W1 -= (0.5*(LR**2)*dW1 + LR*np.random.randn(*W1.shape))
+				b1 -= (0.5*(LR**2)*db1 + LR*np.random.randn(*b1.shape))
+			else:
+				W2 -= LR*dW2
+				b2 -= LR*db2
+				W1 -= LR*dW1
+				b1 -= LR*db1
 
 			pbar.set_description('Epoch: {}'.format(epoch)) # Printing Batch Loss here slows down training 
 	        
