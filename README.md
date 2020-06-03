@@ -75,5 +75,5 @@ where argument for `eval_param_dir` is the directory where parameters are saved 
 
 ## References:
 
-https://github.com/ZiggerZZ/taxitime
+https://github.com/ZiggerZZ/taxitime      
 https://archive.ics.uci.edu/ml/datasets/Devanagari+Handwritten+Character+Dataset
