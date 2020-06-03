@@ -1,10 +1,24 @@
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, ImageFolder
 import torch
 
 import pandas as pd 
 import numpy as np 
+
+def get_devanagri_data(batch_size, test_batch_size):
+	transform = transforms.Compose([transforms.Grayscale(), transforms.Resize(32),transforms.CenterCrop(28),
+		transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+	train_data = ImageFolder('data/DevanagariHandwrittenCharacterDataset/Train', transform=transform)
+	test_data = ImageFolder('data/DevanagariHandwrittenCharacterDataset/Test', transform=transform)
+
+	if batch_size == None:
+		batch_size = len(train_data)
+
+	train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+	test_loader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=True)
+
+	return train_loader, test_loader
 
 def get_mnist_data(batch_size, test_batch_size):
 	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])

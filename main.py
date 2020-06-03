@@ -10,12 +10,12 @@ np.random.seed(0)
 
 parser = argparse.ArgumentParser(description='Neural Network Training')
 
-parser.add_argument('--data', type=str, default='mnist',choices=['mnist', 'taxi_time'], required=True)
+parser.add_argument('--data', type=str, default='mnist',choices=['mnist', 'taxi_time', 'devanagri'], required=True)
 parser.add_argument('--optim', type=str, default='sgd', choices=['vanilla_gd', 'sgd', 'langevin_dynamics'], required=True)
 
 parser.add_argument('--batch_size', type=int, default=32, required=False)
 parser.add_argument('--num_epochs', type=int, default=40, required=False)
-parser.add_argument('--lr', type=float, default=0.002, required=False)
+parser.add_argument('--lr', type=float, default=0.005, required=False)
 
 parser.add_argument('--save_param_dir', type=str, default='saved_parameters', help='path to save learnt parameters')
 parser.add_argument('--save_plots_dir', type=str, default='saved_plots', help='path to save training loss and test set evaluation plots')
