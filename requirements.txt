@@ -2,3 +2,4 @@ torch>=1.2.0
 torchvision
 numpy==1.18.1
 tqdm
+matplotlib
