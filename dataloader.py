@@ -6,7 +6,7 @@ import torch
 import pandas as pd 
 import numpy as np 
 
-def get_devanagri_data(batch_size, test_batch_size):
+def get_devanagari_data(batch_size, test_batch_size):
 	transform = transforms.Compose([transforms.Grayscale(), transforms.Resize(32),transforms.CenterCrop(28),
 		transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 	train_data = ImageFolder('data/DevanagariHandwrittenCharacterDataset/Train', transform=transform)

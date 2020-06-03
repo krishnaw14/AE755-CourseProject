@@ -4,7 +4,7 @@ import torch
 from tqdm import tqdm
 import matplotlib.pyplot as plt 
 
-from dataloader import get_mnist_data, get_taxi_time_data, get_devanagri_data
+from dataloader import get_mnist_data, get_taxi_time_data, get_devanagari_data
 
 def to_one_hot(y, num_labels):
 	one_hot = np.zeros((len(y), num_labels))
@@ -24,7 +24,7 @@ def train(args):
 		print('Test Set Evaluation')
 		correct_predictions = 0.0
 		for i, data in enumerate(test_loader):
-			if args.data == 'mnist' or args.data == 'devanagri':
+			if args.data == 'mnist' or args.data == 'devanagari':
 				x = data[0].view(-1, 784).numpy()
 				y = data[1].numpy()
 			elif args.data == 'taxi_time':
@@ -36,7 +36,7 @@ def train(args):
 			h2 = np.dot(a1, W2) + b2
 			a2 = sigmoid(h2)
 
-			if args.data == 'mnist' or args.data == 'devanagri':
+			if args.data == 'mnist' or args.data == 'devanagari':
 				correct_predictions += np.sum(np.argmax(a2, axis=1) == y)
 			elif args.data == 'taxi_time':
 				correct_predictions += np.sum((a2-y)**2)/100
@@ -74,16 +74,16 @@ def train(args):
 
 		train_loader, test_loader = get_taxi_time_data(batch_size, test_batch_size)
 
-	elif args.data == 'devanagri':
+	elif args.data == 'devanagari':
 		x_dim = 784
-		y_dim = 46
+		y_dim = 15
 		h_dim = 400
 		W1 =  np.random.randn(x_dim, h_dim)*0.01
 		b1 =  np.random.randn(1, h_dim)*0.01
 		W2 =  np.random.randn(h_dim, y_dim)*0.01
 		b2 =  np.random.randn(1, y_dim)*0.01
 
-		train_loader, test_loader = get_devanagri_data(batch_size, test_batch_size)
+		train_loader, test_loader = get_devanagari_data(batch_size, test_batch_size)
 
 	else:
 		raise NotImplementedError
@@ -108,7 +108,7 @@ def train(args):
 	    
 		epoch_loss = 0
 		for i, data in pbar:
-			if args.data == 'mnist' or args.data == 'devanagri':
+			if args.data == 'mnist' or args.data == 'devanagari':
 				x = data[0].view(-1, 784).numpy()
 				y = to_one_hot(data[1].numpy(), num_labels=y_dim)
 			elif args.data == 'taxi_time':
@@ -124,7 +124,7 @@ def train(args):
 			y_pred = a2
 	        
 	        # Calculate Loss
-			if args.data == 'mnist' or args.data == 'devanagri':
+			if args.data == 'mnist' or args.data == 'devanagari':
 				loss = -np.sum(y*np.log(y_pred) + (1-y)*np.log(1-y_pred))/train_loader.batch_size
 				da2 = -(y/y_pred - (1-y)/(1-y_pred))
 
