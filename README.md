@@ -1,6 +1,6 @@
 # AE755 Course Project: Team OptiBois
 
-Neural Network implementation (in NumPy) for Devanagari character prediction and Taxi time prediction 
+Neural Network implementation (in NumPy) for Devanagari character classification and Taxi time prediction 
 
 ## Download all required libraries
 
