@@ -54,7 +54,7 @@ For training via Vanilla Gradient Descent:
 `$ python main.py --data mnist --optim vanilla_gd --save_param_dir mnist_save_params --eval_param_dir mnist_save_plots --lr 0.01`
 
 For training via Langevin Dynamics:           
-`$ ppython main.py --data mnist --optim langevin_dynamics --save_param_dir mnist_save_params --eval_param_dir mnist_save_plots --batch_size 64 --lr 0.01`
+`$ python main.py --data mnist --optim langevin_dynamics --save_param_dir mnist_save_params --eval_param_dir mnist_save_plots --batch_size 64 --lr 0.01`
 
 On executing the above commands, the training and testing plots are saved in `mnist_save_plots` by default and the learnt parameters are saved in a directory `mnist_save_params`. 
 
@@ -63,13 +63,13 @@ Note: To avoid overwrite of weights and plots for different datasets, it is bett
 ## Evaluation
 
 To evaluate based on saved parameters after training, run for taxi time prediction as:  
-`$ python main.py --data taxi_time --optim --evaluate_only --eval_param_dir saved_parameters`
+`$ python main.py --data taxi_time --optim --eval_only --eval_param_dir saved_parameters`
 
 For Devanagari character recognition, execute:  
-`$ python main.py --data devanagari --optim --evaluate_only --eval_param_dir devanagari_params`
+`$ python main.py --data devanagari --optim --eval_only --eval_param_dir devanagari_params`
 
 To evaluate based on saved parameters after training, run for taxi time prediction as:  
-`$ python main.py --data mnist --optim --evaluate_only --eval_param_dir mnist_save_params`
+`$ python main.py --data mnist --optim --eval_only --eval_param_dir mnist_save_params`
 
 where argument for `eval_param_dir` is the directory where parameters are saved in `.npy` format
 

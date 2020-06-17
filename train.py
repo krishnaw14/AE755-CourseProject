@@ -1,6 +1,7 @@
 import os
 import numpy as np 
 import torch
+import torchvision.utils as vutils
 from tqdm import tqdm
 import matplotlib.pyplot as plt 
 
@@ -19,8 +20,9 @@ def train(args):
 
 	# Make this a separate function later
 	def predict():
-		iters_per_epoch = np.ceil(len(test_loader.sampler) / test_loader.batch_size)
+		
 		# pbar = tqdm(enumerate(test_loader), desc = 'Test Set Evaluation', total=iters_per_epoch)
+		vis_counter = 0
 		print('Test Set Evaluation')
 		correct_predictions = 0.0
 		for i, data in enumerate(test_loader):
@@ -38,11 +40,26 @@ def train(args):
 
 			if args.data == 'mnist' or args.data == 'devanagari':
 				correct_predictions += np.sum(np.argmax(a2, axis=1) == y)
+
+				if args.visualize_eval:
+					vis_counter += 1
+					devanagari_character_list = np.array([key.split('_')[-1] for key in test_loader.dataset.class_to_idx.keys()])
+					iters_per_epoch = np.ceil(len(test_loader.sampler) / test_loader.batch_size)
+					print('Prediction: ', devanagari_character_list[ np.argmax(a2, axis=1).astype(np.int8) ])
+					print('GT: ', devanagari_character_list[y])
+					img_grid = vutils.make_grid(data[0])
+					plt.close()
+					plt.imshow(img_grid.permute(1,2,0).numpy())
+					if vis_counter < 5:
+						plt.show()
+					else:
+						exit(1)
+
 			elif args.data == 'taxi_time':
 				correct_predictions += np.sum((a2-y)**2)/100
 
 		# print('Test Set Accuracy:(%)', correct_predictions*100/(test_loader.batch_size*iters_per_epoch))
-		return correct_predictions*100/(test_loader.batch_size*iters_per_epoch)
+		return correct_predictions*100/(len(test_loader.dataset))
 
 	batch_size = args.batch_size
 	test_batch_size = args.batch_size
@@ -108,6 +125,7 @@ def train(args):
 	    
 		epoch_loss = 0
 		for i, data in pbar:
+
 			if args.data == 'mnist' or args.data == 'devanagari':
 				x = data[0].view(-1, 784).numpy()
 				y = to_one_hot(data[1].numpy(), num_labels=y_dim)
@@ -157,9 +175,6 @@ def train(args):
 		print('Average Epoch Loss:', epoch_loss/iters_per_epoch)
 		training_loss_values.append(epoch_loss/iters_per_epoch)
 		test_accuracy_values.append(predict())
-
-		# if args.data == 'devanagri' and epoch == 30:
-		# 	LR *= 0.1
 
 	print('Final Evaluation on Test Set:')
 	print(predict())
